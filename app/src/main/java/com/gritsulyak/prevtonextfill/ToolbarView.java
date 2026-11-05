@@ -58,6 +58,7 @@ public final class ToolbarView extends View {
         super(context, attrs, defStyleAttr);
 
         setBackgroundColor(COLOR_TOOLBAR);
+        setClickable(true);
         setFocusable(true);
         setContentDescription("123Fill toolbar");
 

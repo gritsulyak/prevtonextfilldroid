@@ -2,8 +2,8 @@ plugins {
     id("com.android.application")
 }
 
-val appVersionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 1
-val appVersionName = (findProperty("versionName") as String?) ?: "1.0"
+val appVersionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 101
+val appVersionName = (findProperty("versionName") as String?) ?: "1.0.1"
 
 val releaseKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
 val releaseKeystorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")

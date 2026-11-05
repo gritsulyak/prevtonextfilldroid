@@ -5,13 +5,16 @@ package com.gritsulyak.prevtonextfill;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.graphics.Color;
+import android.content.pm.PackageManager;
+import android.graphics.Insets;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -26,6 +29,8 @@ import com.gritsulyak.prevtonextfill.game.Levels;
 public final class MainActivity extends Activity
         implements GameView.Listener, ToolbarView.Listener {
 
+    private static final int COLOR_SYSTEM_BAR = 0xFFC0C0C0;
+
     private GameView gameView;
 
     @Override
@@ -39,10 +44,27 @@ public final class MainActivity extends Activity
 
     private void configureSystemBars() {
         Window window = getWindow();
-        window.setStatusBarColor(Color.rgb(192, 192, 192));
-        window.setNavigationBarColor(Color.rgb(192, 192, 192));
+        window.setStatusBarColor(COLOR_SYSTEM_BAR);
+        window.setNavigationBarColor(COLOR_SYSTEM_BAR);
 
-        int flags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 15 (targetSdk 35) forces edge-to-edge, but opt in
+            // explicitly on every version so the layout is identical and the
+            // root view always receives the system-bar insets we apply below.
+            window.setDecorFitsSystemWindows(false);
+            WindowInsetsController controller = window.getDecorView().getWindowInsetsController();
+            if (controller != null) {
+                int appearance = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                        | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                controller.setSystemBarsAppearance(appearance, appearance);
+            }
+            return;
+        }
+
+        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
         }
@@ -52,7 +74,9 @@ public final class MainActivity extends Activity
     private void buildUi() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.WHITE);
+        // The root shows through the transparent system-bar areas on Android
+        // 15+, so keep the Win32 grey there as well as behind the toolbar.
+        root.setBackgroundColor(COLOR_SYSTEM_BAR);
 
         ToolbarView toolbar = new ToolbarView(this);
         toolbar.setId(R.id.toolbar_view);
@@ -66,7 +90,40 @@ public final class MainActivity extends Activity
         root.addView(gameView, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
+        applySystemBarInsets(root);
         setContentView(root);
+        root.requestApplyInsets();
+    }
+
+    /**
+     * Keeps the Win32 toolbar below the Android status bar (clock/battery) and
+     * above the navigation bar. Without this, Android 15 draws the toolbar
+     * underneath the status bar, where the system bar swallows the taps.
+     */
+    private void applySystemBarInsets(View root) {
+        root.setOnApplyWindowInsetsListener((view, insets) -> {
+            int left;
+            int top;
+            int right;
+            int bottom;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Insets bars = insets.getInsets(
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                left = bars.left;
+                top = bars.top;
+                right = bars.right;
+                bottom = bars.bottom;
+            } else {
+                left = insets.getSystemWindowInsetLeft();
+                top = insets.getSystemWindowInsetTop();
+                right = insets.getSystemWindowInsetRight();
+                bottom = insets.getSystemWindowInsetBottom();
+            }
+
+            view.setPadding(left, top, right, bottom);
+            return insets;
+        });
     }
 
     private int dp(int value) {
@@ -162,10 +219,17 @@ public final class MainActivity extends Activity
     }
 
     private void showAbout() {
+        String version = "";
+        try {
+            version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException ignored) {
+            // Should not happen for our own package; keep the dialog usable.
+        }
+
         new AlertDialog.Builder(this)
                 .setTitle(R.string.about_title)
                 .setIcon(R.mipmap.ic_launcher)
-                .setMessage(R.string.about_text)
+                .setMessage(getString(R.string.about_text, version))
                 .setPositiveButton(R.string.ok, null)
                 .show();
     }

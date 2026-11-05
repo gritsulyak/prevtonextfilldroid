@@ -17,9 +17,12 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.graphics.PointF;
+import android.os.Build;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.EditText;
 
 import androidx.test.core.app.ActivityScenario;
@@ -66,6 +69,32 @@ public final class MainActivityE2ETest {
         onView(withId(R.id.toolbar_view)).check(matches(isDisplayed()));
         onView(withId(R.id.game_view)).check(matches(isDisplayed()));
         assertState(0, "OPAPA", 1, 3, 3);
+    }
+
+    @Test
+    public void toolbarAndItsButtonsAreBelowTheStatusBar() {
+        scenario.onActivity(activity -> {
+            ToolbarView toolbar = activity.findViewById(R.id.toolbar_view);
+            WindowInsets insets = toolbar.getRootWindowInsets();
+            assertNotNull(insets);
+
+            int statusBarBottom = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                    ? insets.getInsets(WindowInsets.Type.statusBars()).top
+                    : insets.getSystemWindowInsetTop();
+            int[] location = new int[2];
+            toolbar.getLocationOnScreen(location);
+
+            assertTrue("toolbar top " + location[1] + " must be below status bar "
+                            + statusBarBottom,
+                    location[1] >= statusBarBottom);
+
+            for (int action = 0; action < 4; action++) {
+                PointF center = toolbar.getButtonCenter(action);
+                assertNotNull("toolbar button " + action + " has no bounds", center);
+                assertTrue("toolbar button " + action + " must be below status bar",
+                        location[1] + center.y > statusBarBottom);
+            }
+        });
     }
 
     @Test
@@ -128,7 +157,7 @@ public final class MainActivityE2ETest {
     public void aboutDialogIsShown() {
         clickToolbar(ToolbarView.ACTION_ABOUT);
         onView(withText(R.string.about_title)).check(matches(isDisplayed()));
-        onView(withText(containsString("Android port: 2026"))).check(matches(isDisplayed()));
+        onView(withText(containsString("Android port: 1.0.1"))).check(matches(isDisplayed()));
         clickDialogPositive();
     }
 

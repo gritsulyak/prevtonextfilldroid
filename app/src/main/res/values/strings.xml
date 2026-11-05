@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">123Fill</string>
     <string name="about_title">About 1-2-3 fill</string>
-    <string name="about_text">1-2-3 fill, Version 1.0 (internal 0.5)\nIdea and implementation:\n(C) 1994-2010 Roman T. Gritsulyak.\n\nAndroid port: 2026\n\nGoal:\n    fill all field.\nRules: For number &lt;i&gt;\n    you can move only from &lt;i&gt; to &lt;i+1&gt;\n\nToolbar buttons:\nNew Game, Level From Beginning,\nAbout Box, Exit Game.\n\nOriginal used: C++, STL, MinGW, WinAPI, CodeBlocks.\nDistributed under GPL v3, so the source is available.</string>
+    <string name="about_text">1-2-3 fill, Version 1.0 (internal 0.5)\nIdea and implementation:\n(C) 1994-2010 Roman T. Gritsulyak.\n\nAndroid port: %1$s (2026)\nOriginal project: github.com/gritsulyak/GameDev\n\nGoal:\n    fill all field.\nRules: For number &lt;i&gt;\n    you can move only from &lt;i&gt; to &lt;i+1&gt;\n\nToolbar buttons:\nNew Game, Level From Beginning,\nAbout Box, Exit Game.\n\nOriginal used: C++, STL, MinGW, WinAPI, CodeBlocks.\nDistributed under GPL v3, so the source is available.</string>
     <string name="code_title">Code For Level:</string>
     <string name="code_label">(Cheat) Code here:</string>
     <string name="cheat_code_title">Cheat code for level:</string>

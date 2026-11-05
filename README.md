@@ -1,7 +1,10 @@
 # 1-2-3 Fill for Android
 
 A faithful Android port of the original Win32 puzzle game **1-2-3 fill** by
-Roman T. Gritsulyak.
+Roman T. Gritsulyak. The original project is published at
+<https://github.com/gritsulyak/GameDev>; this repository is its Android port.
+
+Current release: **1.0.1**.
 
 <img src="docs/screenshot-opapa.png" alt="1-2-3 Fill running on Android" width="360">
 
@@ -18,8 +21,10 @@ is the original behaviour that makes levels with repeated numbers solvable.
 - The original movement, target-sequence, and jump-back rules.
 - The Win32-style grey bevel buttons, black target numbers, and the original
   20x20 monochrome path/head sprites.
-- The original toolbar actions: New Game, Level From Beginning (cheat code),
-  About, and Exit.
+- The original toolbar actions: New Game (`IDM_NEW`), Level From Beginning
+  (`IDM_NEWLEVEL`, cheat code), About (`IDM_ABOUT`), and Exit (`IDM_EXIT`).
+- The toolbar sits below the Android status bar (clock/battery) and above the
+  navigation bar, including on Android 15 where apps are drawn edge-to-edge.
 - The original modal dialogs and cheat codes.
 - The original `NEXTSTAGE` entry is kept as an end marker; the Android game
   wraps back to `OPAPA` after `FLOWERS` (level 28) instead of trying to play
@@ -85,8 +90,9 @@ rules:
 ```
 
 End-to-end UI tests launch the real activity on an emulator/device, tap the
-custom-drawn board and toolbar through Espresso, play a complete level
-(including the jump-back moves), and verify the dialogs and level transition:
+custom-drawn board and toolbar through Espresso, verify that the toolbar is
+below the status bar, play a complete level (including the jump-back moves),
+and verify the dialogs and level transition:
 
 ```bash
 # Start an API 26+ emulator first, then:
@@ -106,7 +112,7 @@ The e2e suite is in
 3. The instrumentation/e2e suite on API 26 (Android 8.0) and API 35
    emulators.
 
-Pushing a tag such as `v1.0.0` additionally creates a GitHub Release with the
+Pushing a tag such as `v1.0.1` additionally creates a GitHub Release with the
 signed release APK attached. If the release signing secrets are configured,
 that APK is signed with the real release key; otherwise CI uses the debug key.
 
@@ -126,7 +132,7 @@ base64 -w 0 release.jks
 To build the tagged version manually:
 
 ```bash
-./gradlew assembleRelease -PversionName=1.0.0 -PversionCode=100
+./gradlew assembleRelease -PversionName=1.0.1 -PversionCode=101
 ```
 
 ## Project layout
